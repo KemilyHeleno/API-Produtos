@@ -1,10 +1,8 @@
 package com.exemplo.produtos.service;
 
 import com.exemplo.produtos.model.Produto;
-import com.exemplo.produtos.model.Categoria;
 import com.exemplo.produtos.repository.ProdutoRepository;
 import com.exemplo.produtos.repository.CategoriaRepository;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,25 +15,46 @@ public class ProdutoService {
     @Autowired
     private ProdutoRepository produtoRepository;
 
+    // ... outros métodos como salvar, listar, deletar, etc.
+
+    public Integer calcularEstoqueTotalPorCategoria(Long categoriaId) {
+        return produtoRepository.calcularEstoqueTotalPorCategoria(categoriaId);
+    }
+
+
     @Autowired
     private CategoriaRepository categoriaRepository;
 
-    public List<Produto> listarProdutos() {
-        return produtoRepository.findAll();
+    public Produto salvarProduto(Produto produto) {
+        if (produto.getCategoria() == null ||
+            !categoriaRepository.existsById(produto.getCategoria().getId())) {
+            return null; // categoria inexistente
+        }
+
+        if (produtoRepository.existsByNomeAndCategoriaId(produto.getNome(), produto.getCategoria().getId())) {
+            return null; // produto duplicado
+        }
+
+        return produtoRepository.save(produto);
     }
 
-    public Produto salvarProduto(Produto produto) {
-        Categoria categoria = categoriaRepository.findById(produto.getCategoria().getId())
-                .orElse(null);
+    public Produto atualizarProduto(Long id, Produto produtoAtualizado) {
+        Optional<Produto> existente = produtoRepository.findById(id);
+        if (existente.isEmpty()) {
+            return null;
+        }
 
-        if (categoria == null) return null;
+        Produto produto = existente.get();
+        produto.setNome(produtoAtualizado.getNome());
+        produto.setPreco(produtoAtualizado.getPreco());
+        produto.setQuantidade(produtoAtualizado.getQuantidade());
+        produto.setCategoria(produtoAtualizado.getCategoria());
 
-        // Verificar duplicidade de nome na mesma categoria
-        boolean existe = produtoRepository.existsByNomeAndCategoriaId(produto.getNome(), categoria.getId());
-        if (existe) return null;
-
-        produto.setCategoria(categoria);
         return produtoRepository.save(produto);
+    }
+
+    public List<Produto> listarProdutos() {
+        return produtoRepository.findAll();
     }
 
     public Optional<Produto> buscarPorId(Long id) {
@@ -50,23 +69,19 @@ public class ProdutoService {
         return produtoRepository.findByCategoriaId(categoriaId);
     }
 
-    public Produto atualizarProduto(Long id, Produto novoProduto) {
-        return produtoRepository.findById(id).map(produto -> {
-            produto.setNome(novoProduto.getNome());
-            produto.setPreco(novoProduto.getPreco());
-            produto.setQuantidade(novoProduto.getQuantidade());
-            produto.setCategoria(novoProduto.getCategoria());
-            return produtoRepository.save(produto);
-        }).orElse(null);
+    public void deletarProduto(Long id) {
+        Produto produto = produtoRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+
+        if (produto.getQuantidade() > 0) {
+            throw new IllegalStateException("Não é possível excluir um produto com estoque maior que zero.");
+        }
+
+        produtoRepository.delete(produto);
     }
 
-    public boolean excluirProduto(Long id) {
-        Optional<Produto> produto = produtoRepository.findById(id);
-        if (produto.isPresent()) {
-            if (produto.get().getQuantidade() > 0) return false;
-            produtoRepository.deleteById(id);
-            return true;
-        }
-        return false;
+    // 🔢 Novo método: calcular estoque total por categoria
+    public Integer calcularEstoquePorCategoria(Long categoriaId) {
+        return produtoRepository.calcularEstoqueTotalPorCategoria(categoriaId);
     }
 }

@@ -6,10 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
+
 import java.util.List;
-
-
-@RestControllerAdvice
 
 @RestController
 @RequestMapping("/api/produtos")
@@ -61,13 +59,22 @@ public class ProdutoController {
         return ResponseEntity.ok(produtoService.buscarPorCategoria(id));
     }
 
+    @GetMapping("/categoria/{id}/estoque")
+    public ResponseEntity<?> calcularEstoquePorCategoria(@PathVariable Long id) {
+        Integer totalEstoque = produtoService.calcularEstoqueTotalPorCategoria(id);
+        return ResponseEntity.ok()
+                .body("Estoque total da categoria " + id + ": " + (totalEstoque != null ? totalEstoque : 0));
+    }
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deletarProduto(@PathVariable Long id) {
-        boolean deletado = produtoService.excluirProduto(id);
-        if (deletado) {
-            return ResponseEntity.ok("Produto excluído com sucesso");
-        } else {
-            return ResponseEntity.badRequest().body("Produto não encontrado ou com estoque maior que zero");
+    public ResponseEntity<?> deletar(@PathVariable Long id) {
+        try {
+            produtoService.deletarProduto(id);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
         }
     }
 }
