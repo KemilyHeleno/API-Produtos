@@ -1,0 +1,9 @@
+com\exemplo\produtos\service\ProdutoService.class
+com\exemplo\produtos\controller\ProdutoController.class
+com\exemplo\produtos\controller\CategoriaController.class
+com\exemplo\produtos\model\Produto.class
+com\exemplo\produtos\service\CategoriaService.class
+com\exemplo\produtos\ProdutosApiApplication.class
+com\exemplo\produtos\repository\ProdutoRepository.class
+com\exemplo\produtos\repository\CategoriaRepository.class
+com\exemplo\produtos\model\Categoria.class
