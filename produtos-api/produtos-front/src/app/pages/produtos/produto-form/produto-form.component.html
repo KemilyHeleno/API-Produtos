@@ -1,0 +1,20 @@
+<form (ngSubmit)="salvarProduto()" #produtoForm="ngForm">
+  <div>
+    <label>Nome</label>
+    <input type="text" [(ngModel)]="produto.nome" name="nome" required />
+  </div>
+
+  <div>
+    <label>Preço</label>
+    <input type="number" [(ngModel)]="produto.preco" name="preco" required />
+  </div>
+
+  <div>
+    <label>Categoria</label>
+    <select [(ngModel)]="produto.categoria.id" name="categoriaId" required>
+      <option *ngFor="let cat of categorias" [value]="cat.id">{{ cat.nome }}</option>
+    </select>
+  </div>
+
+  <button type="submit">Salvar</button>
+</form>
