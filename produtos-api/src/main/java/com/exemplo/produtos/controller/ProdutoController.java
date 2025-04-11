@@ -2,12 +2,14 @@ package com.exemplo.produtos.controller;
 
 import com.exemplo.produtos.model.Produto;
 import com.exemplo.produtos.service.ProdutoService;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import jakarta.validation.Valid;
 import java.util.List;
+
+
+@RestControllerAdvice
 
 @RestController
 @RequestMapping("/api/produtos")
@@ -24,6 +26,16 @@ public class ProdutoController {
         } else {
             return ResponseEntity.badRequest()
                     .body("Categoria inexistente ou produto já existente na mesma categoria.");
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> atualizarProduto(@PathVariable Long id, @Valid @RequestBody Produto produtoAtualizado) {
+        Produto atualizado = produtoService.atualizarProduto(id, produtoAtualizado);
+        if (atualizado != null) {
+            return ResponseEntity.ok(atualizado);
+        } else {
+            return ResponseEntity.notFound().build();
         }
     }
 
@@ -47,16 +59,6 @@ public class ProdutoController {
     @GetMapping("/categoria/{id}")
     public ResponseEntity<List<Produto>> buscarPorCategoria(@PathVariable Long id) {
         return ResponseEntity.ok(produtoService.buscarPorCategoria(id));
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<?> atualizarProduto(@PathVariable Long id, @RequestBody Produto produtoAtualizado) {
-        Produto atualizado = produtoService.atualizarProduto(id, produtoAtualizado);
-        if (atualizado != null) {
-            return ResponseEntity.ok(atualizado);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
     }
 
     @DeleteMapping("/{id}")

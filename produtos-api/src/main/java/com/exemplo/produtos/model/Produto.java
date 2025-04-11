@@ -1,8 +1,8 @@
 package com.exemplo.produtos.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
 
 @Entity
@@ -13,17 +13,22 @@ public class Produto {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "O nome do produto é obrigatório")
+    @Size(max = 100, message = "O nome do produto deve ter no máximo 100 caracteres")
     private String nome;
 
-    @Column(nullable = false)
+    @NotNull(message = "O preço é obrigatório")
+    @PositiveOrZero(message = "O preço deve ser maior ou igual a zero")
     private BigDecimal preco;
 
-    @Column(nullable = false)
+    @NotNull(message = "A quantidade é obrigatória")
+    @Min(value = 0, message = "A quantidade não pode ser negativa")
     private Integer quantidade;
 
+    @NotNull(message = "A categoria é obrigatória")
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "categoria_id", nullable = false)
-    @JsonIgnoreProperties("produtos") // <-- isso evita loop na serialização
+    @JsonIgnoreProperties("produtos")
     private Categoria categoria;
 
     // Getters e Setters

@@ -14,7 +14,12 @@ public class CategoriaService {
     @Autowired
     private CategoriaRepository categoriaRepository;
 
-    public List<Categoria> listarTodas() {
+    public Categoria salvarCategoria(Categoria categoria) {
+        // Pode adicionar lógica para evitar duplicações se quiser
+        return categoriaRepository.save(categoria);
+    }
+
+    public List<Categoria> listarCategorias() {
         return categoriaRepository.findAll();
     }
 
@@ -22,11 +27,17 @@ public class CategoriaService {
         return categoriaRepository.findById(id);
     }
 
-    public Categoria salvar(Categoria categoria) {
-        return categoriaRepository.save(categoria);
+    public Categoria atualizarCategoria(Long id, Categoria categoriaAtualizada) {
+        return categoriaRepository.findById(id).map(categoria -> {
+            categoria.setNome(categoriaAtualizada.getNome());
+            return categoriaRepository.save(categoria);
+        }).orElse(null);
     }
 
-    public void deletar(Long id) {
-        categoriaRepository.deleteById(id);
+    public boolean excluirCategoria(Long id) {
+        return categoriaRepository.findById(id).map(categoria -> {
+            categoriaRepository.delete(categoria);
+            return true;
+        }).orElse(false);
     }
 }
