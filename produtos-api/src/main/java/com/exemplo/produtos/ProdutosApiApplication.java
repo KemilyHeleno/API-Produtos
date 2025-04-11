@@ -10,4 +10,3 @@ public class ProdutosApiApplication {
         SpringApplication.run(ProdutosApiApplication.class, args);
     }
 }
-
